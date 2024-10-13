@@ -1,10 +1,30 @@
 // Find all our documentation at https://docs.near.org
 use near_sdk::json_types::U128;
 use near_sdk::{
- AccountId, near, PanicOnDefault, env, Promise, NearToken, log
+ AccountId, near, PanicOnDefault, env, Promise, NearToken, log, Gas, PromiseResult
 };
 use std::collections::HashMap;
+use near_sdk::ext_contract;
 
+pub const GAS_FOR_FT_TRANSFER: Gas = Gas::from_gas(20_000_000_000_000);
+pub const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas::from_gas(20_000_000_000_000);
+pub const YOCTO_DEPOSIT: NearToken = NearToken::from_yoctonear(1);
+
+#[ext_contract(ext_fungible_token)]
+pub trait ExtFungibleToken  {
+    fn ft_transfer(&mut self, receiver_id: AccountId, amount: U128, memo: Option<String>);
+}
+
+#[ext_contract(ext_wrap)]
+pub trait ExtWrap  {
+    fn near_deposit(&mut self);
+    fn ft_transfer_call(&mut self, receiver_id: AccountId, amount: U128, msg: Option<String>);
+   // Arguments: {
+    //     "receiver_id": "v2.ref-finance.near",
+    //     "amount": "1000000000000000000000000",
+    //     "msg": "{\"force\":0,\"actions\":[{\"pool_id\":974,\"token_in\":\"wrap.near\",\"token_out\":\"2260fac5e5542a773aa44fbcfedf7c193bc2c599.factory.bridge.near\",\"amount_in\":\"1000000000000000000000000\",\"amount_out\":\"0\",\"min_amount_out\":\"7486\"}]}"
+    //   }
+}
 
 // Define the contract structure
 #[near(contract_state, serializers = [json, borsh])]
@@ -17,6 +37,8 @@ pub struct Contract {
     pub token_address: AccountId,
     pub owner: AccountId,
     pub fees: u8,
+    pub wrap_account: AccountId,
+    pub pool_id: u16,
 }
 
 #[near(serializers = [json, borsh])]
@@ -36,7 +58,7 @@ pub struct User {
 impl Contract {
     #[init]
     #[private]
-    pub fn init(pool_address: AccountId, token_address: AccountId, owner: AccountId, fees: u8) -> Self {
+    pub fn init(pool_address: AccountId, token_address: AccountId, owner: AccountId, fees: u8, wrap_account: AccountId, pool_id: u16) -> Self {
         Self {
             
             users: HashMap::new(),
@@ -46,6 +68,8 @@ impl Contract {
             token_address,
             owner,
             fees,
+            wrap_account,
+            pool_id,
         }
     }
 
@@ -114,6 +138,20 @@ impl Contract {
         user.total_swapped = U128(user.total_swapped.0 - amount.0); // subtract amount;
         self.users.insert(env::signer_account_id(), user.clone());
 
+
+        ext_fungible_token::ext(self.token_address.clone())
+            .with_static_gas(GAS_FOR_FT_TRANSFER)
+            .with_attached_deposit(YOCTO_DEPOSIT)
+            .ft_transfer(
+                env::signer_account_id(),
+                amount.into(),
+                None
+            )
+        .then(Self::ext(env::current_account_id())
+                .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
+                .callback_post_withdraw_reward(
+        ));
+
         // ext_self::self.token_address
         //     .with_static_gas(gas)
         //     .call(ft_transfer_call {
@@ -122,6 +160,11 @@ impl Contract {
         //         amount: amount_to_withdraw,
         //         msg: "".to_string(),
         //     });
+    }
+
+    #[private]
+    pub fn callback_post_withdraw_reward(){
+
     }
 
     #[payable]
@@ -176,7 +219,7 @@ impl Contract {
         for (_, user) in self.users.iter() {
             // check if user has to swap and if it is not paused
             // create a mutable copy of the user
-            let mut tmp_user = user.clone();
+            let mut _tmp_user = user.clone();
 
             if env::block_timestamp() >= user.last_swap_timestamp + user.swap_interval && user.pause == false {
                 // check if amount per swap is bigger than amount otherwise pause the user
@@ -199,9 +242,61 @@ impl Contract {
 
         let batch_amount_total:u128 = batch_amount.0 - (batch_amount.0 * self.fees as u128) / 100;
         
+        // perform the swap
+
+        ext_wrap::ext(self.wrap_account.clone())
+            .with_static_gas(GAS_FOR_FT_TRANSFER)
+            .with_attached_deposit(NearToken::from_yoctonear(batch_amount_total))
+            .near_deposit(
+            )
+        .then(Self::ext(env::current_account_id())
+                .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
+                .callback_post_wrap(
+                    batch_users,
+                    batch_amount,
+                    batch_amount_total
+        ));
+
+    }
+
+    #[private]
+    pub fn callback_post_wrap(&mut self, batch_users:Vec<AccountId>, batch_amount:U128, batch_amount_total:u128) {
+        assert_eq!(env::promise_results_count(), 1);
+        assert_eq!(env::promise_result(0), PromiseResult::Successful(vec![]));
+
+        // format the actions
+        let action: String = format!(
+            "{{\"force\":0,\"actions\":[{{\"pool_id\":{},\"token_in\":\"{}\",\"token_out\":\"{}\",\"amount_in\":\"1000000000000000000000000\",\"amount_out\":\"0\",\"min_amount_out\":\"7486\"}}]}}",
+            self.pool_id.to_string(),
+            self.wrap_account.clone(),
+            self.token_address.clone()
+        );
+
+        ext_wrap::ext(self.wrap_account.clone())
+            .with_static_gas(GAS_FOR_FT_TRANSFER)
+            .with_attached_deposit(NearToken::from_yoctonear(1))
+            .ft_transfer_call(
+                env::current_account_id(),
+                batch_amount.into(),
+                Some(action.clone())
+            )
+        .then(Self::ext(env::current_account_id())
+                .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
+                .callback_post_swap(
+                    batch_users,
+                    batch_amount,
+                    batch_amount_total
+        ));
+    }
+
+    #[private]
+    pub fn callback_post_swap(&mut self, batch_users:Vec<AccountId>, batch_amount:U128, batch_amount_total:u128) -> HashMap<AccountId, u128> {
+        assert_eq!(env::promise_results_count(), 1);
+        assert_eq!(env::promise_result(0), PromiseResult::Successful(vec![]));
+        // initialize the return value
+        let mut return_value: HashMap<AccountId, u128> = HashMap::new();
 
         // update last_swap_timestamp, total_swapped and amount for users in the batch
-
         for user in batch_users {
             let mut user_tmp: User = self.users.get(&user.clone()).unwrap().clone();
             user_tmp.last_swap_timestamp = env::block_timestamp();
@@ -211,9 +306,12 @@ impl Contract {
             self.users.insert(user_tmp.wallet.clone(), user_tmp.clone());
             // log the swap
             log!("User {} swapped {} NEAR for {} {}", user_tmp.wallet.clone(), user_tmp.amount_per_swap.0, user_tmp.total_swapped.0, self.token_address);
+
+            // add to return value
+            return_value.insert(user.clone(), user_tmp.total_swapped.0);
         }
 
-        
+        return_value
     }
 
     #[payable]
@@ -246,7 +344,10 @@ impl Contract {
         self.fees
     }
 
-
+    pub fn get_user(&self) -> User {
+        let user = env::signer_account_id();
+        self.users.get(&user).unwrap().clone()
+    }
 }
 
 /*
