@@ -1,12 +1,13 @@
 // Find all our documentation at https://docs.near.org
 use near_sdk::json_types::U128;
 use near_sdk::{
- AccountId, near, PanicOnDefault, env, Promise, NearToken, log, Gas, PromiseResult
+ AccountId, near, PanicOnDefault, env, Promise, NearToken, log, Gas, PromiseResult, PromiseError, serde_json
 };
 use std::collections::HashMap;
 use near_sdk::ext_contract;
 
 pub const GAS_FOR_FT_TRANSFER: Gas = Gas::from_gas(20_000_000_000_000);
+pub const GAS_FOR_FT_TRANSFER_CALL: Gas = Gas::from_gas(100_000_000_000_000);
 pub const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas::from_gas(20_000_000_000_000);
 pub const YOCTO_DEPOSIT: NearToken = NearToken::from_yoctonear(1);
 
@@ -33,12 +34,12 @@ pub struct Contract {
     pub users: HashMap<AccountId, User>,
     pub user_addresses: Vec<AccountId>,
     pub batch_swap_threshold: u8,
-    pub pool_address: AccountId,
     pub token_address: AccountId,
     pub owner: AccountId,
     pub fees: u8,
     pub wrap_account: AccountId,
     pub pool_id: u16,
+    pub pool_address: AccountId,
 }
 
 #[near(serializers = [json, borsh])]
@@ -58,18 +59,18 @@ pub struct User {
 impl Contract {
     #[init]
     #[private]
-    pub fn init(pool_address: AccountId, token_address: AccountId, owner: AccountId, fees: u8, wrap_account: AccountId, pool_id: u16) -> Self {
+    pub fn init(token_address: AccountId, owner: AccountId, fees: u8, wrap_account: AccountId, pool_id: u16, pool_address: AccountId) -> Self {
         Self {
             
             users: HashMap::new(),
             user_addresses: Vec::new(),
             batch_swap_threshold: 10, // Adjust threshold as needed
-            pool_address,
             token_address,
             owner,
             fees,
             wrap_account,
             pool_id,
+            pool_address,
         }
     }
 
@@ -119,7 +120,8 @@ impl Contract {
         // check if user has enough balance
         assert!(user.amount >= amount, "User does not have enough balance");
 
-        user.amount = U128(user.amount.0 - amount.0); // subtract amount;
+        let new_amount = user.amount.0.checked_sub(amount.0).expect("Insufficient funds");
+        user.amount = U128(new_amount); // subtract amount;
         self.users.insert(env::signer_account_id(), user.clone());
 
         let near_amount: NearToken = NearToken::from_yoctonear(amount.0);
@@ -135,7 +137,8 @@ impl Contract {
         // check if user has enough balance
         assert!(user.total_swapped >= amount, "User does not have enough balance");
 
-        user.total_swapped = U128(user.total_swapped.0 - amount.0); // subtract amount;
+        let new_total_swapped = user.total_swapped.0.checked_sub(amount.0).expect("Amount to withdraw is greater than total swapped");
+        user.total_swapped = U128(new_total_swapped); // subtract amount;
         self.users.insert(env::signer_account_id(), user.clone());
 
 
@@ -240,9 +243,9 @@ impl Contract {
             }
         }
 
-        let batch_amount_total:u128 = batch_amount.0 - (batch_amount.0 * self.fees as u128) / 100;
-        
-        // perform the swap
+        let batch_amount_total = batch_amount.0.checked_sub(
+            batch_amount.0.checked_mul(self.fees as u128).unwrap_or(0) / 10000
+        ).unwrap_or(0);
 
         ext_wrap::ext(self.wrap_account.clone())
             .with_static_gas(GAS_FOR_FT_TRANSFER)
@@ -262,22 +265,23 @@ impl Contract {
     #[private]
     pub fn callback_post_wrap(&mut self, batch_users:Vec<AccountId>, batch_amount:U128, batch_amount_total:u128) {
         assert_eq!(env::promise_results_count(), 1);
-        assert_eq!(env::promise_result(0), PromiseResult::Successful(vec![]));
+        assert_eq!(env::promise_result(0), PromiseResult::Successful(vec![]), "Failed to wrap tokens");
 
         // format the actions
         let action: String = format!(
-            "{{\"force\":0,\"actions\":[{{\"pool_id\":{},\"token_in\":\"{}\",\"token_out\":\"{}\",\"amount_in\":\"1000000000000000000000000\",\"amount_out\":\"0\",\"min_amount_out\":\"7486\"}}]}}",
+            "{{\"force\":0,\"actions\":[{{\"pool_id\":{},\"token_in\":\"{}\",\"token_out\":\"{}\",\"amount_in\":\"{}\",\"amount_out\":\"0\",\"min_amount_out\":\"0\"}}]}}",
             self.pool_id.to_string(),
             self.wrap_account.clone(),
-            self.token_address.clone()
+            self.token_address.clone(),
+            batch_amount_total
         );
 
         ext_wrap::ext(self.wrap_account.clone())
-            .with_static_gas(GAS_FOR_FT_TRANSFER)
+            .with_static_gas(GAS_FOR_FT_TRANSFER_CALL)
             .with_attached_deposit(NearToken::from_yoctonear(1))
             .ft_transfer_call(
-                env::current_account_id(),
-                batch_amount.into(),
+                self.pool_address.clone(),
+                batch_amount_total.into(),
                 Some(action.clone())
             )
         .then(Self::ext(env::current_account_id())
@@ -290,11 +294,24 @@ impl Contract {
     }
 
     #[private]
-    pub fn callback_post_swap(&mut self, batch_users:Vec<AccountId>, batch_amount:U128, batch_amount_total:u128) -> HashMap<AccountId, u128> {
+    pub fn callback_post_swap(&mut self, batch_users:Vec<AccountId>, batch_amount:U128, batch_amount_total:u128, #[callback_result] call_result: Result<String, PromiseError>,) -> HashMap<AccountId, u128> {
         assert_eq!(env::promise_results_count(), 1);
-        assert_eq!(env::promise_result(0), PromiseResult::Successful(vec![]));
+        if call_result.is_err() {
+            log!("There was an error while swapping");
+            // we should rollback the transaction
+            // self.rollback();
+            
+            return HashMap::new();
+        }
+        
         // initialize the return value
         let mut return_value: HashMap<AccountId, u128> = HashMap::new();
+
+        // parse the result
+        let result = call_result.unwrap();
+        let result_json: serde_json::Value = serde_json::from_str(&result).unwrap();
+        // log the result
+        log!("{:#?}", result_json);
 
         // update last_swap_timestamp, total_swapped and amount for users in the batch
         for user in batch_users {
@@ -302,7 +319,8 @@ impl Contract {
             user_tmp.last_swap_timestamp = env::block_timestamp();
             // get the percentage of total_swapped and amount
             user_tmp.total_swapped = U128(user_tmp.total_swapped.0 + (user_tmp.amount_per_swap.0 / batch_amount.0) * batch_amount_total);
-            user_tmp.amount = U128(user_tmp.amount.0 - user_tmp.amount_per_swap.0);
+            let new_amount = user_tmp.amount.0.checked_sub(user_tmp.amount_per_swap.0).expect("Insufficient funds");
+            user_tmp.amount = U128(new_amount);
             self.users.insert(user_tmp.wallet.clone(), user_tmp.clone());
             // log the swap
             log!("User {} swapped {} NEAR for {} {}", user_tmp.wallet.clone(), user_tmp.amount_per_swap.0, user_tmp.total_swapped.0, self.token_address);
@@ -322,16 +340,6 @@ impl Contract {
 
     pub fn get_batch_swap_threshold(&self) -> u8 {
         self.batch_swap_threshold.into()
-    }
-
-    #[payable]
-    pub fn set_pool_address(&mut self, new_pool_address: AccountId) {
-        assert_eq!(env::signer_account_id(), self.owner);
-        self.pool_address = new_pool_address;
-    }
-
-    pub fn get_pool_address(&self) -> AccountId {
-        self.pool_address.clone()
     }
 
     #[payable]
