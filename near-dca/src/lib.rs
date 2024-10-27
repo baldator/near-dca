@@ -1,7 +1,7 @@
 // Find all our documentation at https://docs.near.org
 use near_sdk::json_types::U128;
 use near_sdk::{
- AccountId, near, PanicOnDefault, env, Promise, NearToken, log, Gas, PromiseResult, PromiseError, serde_json
+ AccountId, near, PanicOnDefault, env, Promise, NearToken, log, Gas, PromiseResult, PromiseError
 };
 use std::collections::HashMap;
 use near_sdk::ext_contract;
@@ -313,8 +313,6 @@ impl Contract {
         // initialize the return value
         let mut return_value: HashMap<AccountId, u128> = HashMap::new();
 
-        // parse the result
-        let result = call_result.unwrap();
         // update last_swap_timestamp, total_swapped and amount for users in the batch
         for user in batch_users {
             let mut user_tmp: User = self.users.get(&user.clone()).unwrap().clone();
