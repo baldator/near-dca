@@ -68,6 +68,10 @@ async function main() {
             attachedDeposit: '1', // Optional: attach NEAR tokens if needed
         });
         logStream.write(`Write function result: ${JSON.stringify(response)}\n`);
+
+        // send telegram message
+        const bot = new Telegraf(TELEGRAM_BOT_TOKEN)
+        bot.telegram.sendMessage(821896868, `DCA Bot: test`);
         
   } catch (error) {
     logStream.write(`Error calling view function: ${JSON.stringify(error)}\n`);
@@ -95,8 +99,8 @@ async function isValidNearAddress(nearConfig, accountId) {
     try {
       const near = await connect(nearConfig);
       const account = await near.account(accountId);
-      console.log(account.state)
-      return account.state; // If account exists, state will be non-empty
+      const state = await account.state();
+    return Object.keys(state).length > 0;
     } catch (error) {
       console.error(`Error checking account: ${error}`);
       return false;
@@ -109,16 +113,17 @@ async function checkAddressRegistered(accountId, telegramId){
     const sqlite3 = require('sqlite3').verbose();
     const db = new sqlite3.Database(DB_FILE);
 
-    db.serialize(() => {
-        db.get(`SELECT * FROM users WHERE wallet = '${accountId}' AND telegram_id = '${telegramId}'`, (err, row) => {
-            if(err) console.error(err.message);
-            if(row) {
-                db.close();
-                return true;
-            } else {
-                db.close();
-                return false;
-            }
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM users WHERE wallet = '${accountId}' AND telegram_id = '${telegramId}'`, (err, row) => {
+                if(err) {
+                    console.error(err.message);
+                    reject(false);
+                } else {
+                    db.close();
+                    resolve(row !== undefined);
+                }
+            });
         });
     });
 
@@ -176,6 +181,7 @@ bot.command('register', async (ctx) => {
 
   // check if address is a valid near address
   let isValid = await isValidNearAddress(config, address)
+  console.log(isValid)
   if (!isValid) {
     ctx.reply('Please provide a valid address')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
@@ -186,7 +192,7 @@ bot.command('register', async (ctx) => {
   }
 
   // check if address is already registered
-  const registered = await checkAddressRegistered(address, ctx.from.id)
+  let registered = await checkAddressRegistered(address, ctx.from.id)
   if (registered) {
     ctx.reply('Address already registered')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Address already registered: ${address}\n`)
@@ -194,7 +200,7 @@ bot.command('register', async (ctx) => {
   }
 
   // register address in database
-  const register = await registerAddress(address, ctx.from.id)
+  let register = await registerAddress(address, ctx.from.id)
   if (register) {
     ctx.reply('Address registered')
     logStreamBot.write(`${new Date().toISOString()} -- Address registered: ${address}\n`)

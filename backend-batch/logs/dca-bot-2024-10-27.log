@@ -56,3 +56,187 @@ Processing update 1043552412024-10-27T20:48:55.495Z -- Processing update 1043552
     }
 2024-10-27T20:48:55.560Z -- Address registered: balda.testnet
 2024-10-27T20:48:55.562Z -- Processing update 104355242
+2024-10-27T20:53:26.674Z -- Processing update 104355243
+2024-10-27T20:53:26.674Z -- Registering new address: balda.testnet. current telegram id: 821896868
+2024-10-27T20:53:26.675Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T20:53:26.699Z -- Address registered: balda.testnet
+2024-10-27T20:53:26.700Z -- Processing update 104355243
+2024-10-27T20:54:37.507Z -- Processing update 104355244
+2024-10-27T20:54:37.508Z -- Registering new address: balda.near. current telegram id: 821896868
+2024-10-27T20:54:37.510Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T20:54:37.543Z -- Address registered: balda.near
+2024-10-27T20:54:37.545Z -- Processing update 104355244
+2024-10-27T20:55:23.500Z -- Processing update 104355245
+2024-10-27T20:55:23.501Z -- Registering new address: balda.near. current telegram id: 821896868
+2024-10-27T20:55:23.503Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T20:55:23.528Z -- Address registered: balda.near
+2024-10-27T20:55:23.530Z -- Processing update 104355245
+2024-10-27T20:56:11.867Z -- Processing update 104355246
+2024-10-27T20:56:11.868Z -- Registering new address: balda.testnet. current telegram id: 821896868
+2024-10-27T20:56:11.869Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T20:56:11.928Z -- Address registered: balda.testnet
+2024-10-27T20:56:11.928Z -- Processing update 104355246
+2024-10-27T20:56:22.143Z -- Processing update 104355247
+2024-10-27T20:56:22.143Z -- Registering new address: balda.testnet. current telegram id: 821896868
+2024-10-27T20:56:22.144Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T20:56:22.184Z -- Address registered: balda.testnet
+2024-10-27T20:56:22.184Z -- Processing update 104355247
+2024-10-27T20:58:12.023Z -- Processing update 104355248
+2024-10-27T20:58:12.024Z -- Registering new address: tmp.testnet. current telegram id: 821896868
+2024-10-27T20:58:12.024Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T20:58:12.060Z -- Address registered: tmp.testnet
+2024-10-27T20:58:12.061Z -- Processing update 104355248
+2024-10-27T20:59:15.082Z -- Processing update 104355249
+2024-10-27T20:59:15.084Z -- Registering new address: tmp.testnet. current telegram id: 821896868
+2024-10-27T20:59:15.085Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T20:59:15.112Z -- Address registered: tmp.testnet
+2024-10-27T20:59:15.114Z -- Processing update 104355249
+2024-10-27T20:59:44.553Z -- Processing update 104355250
+2024-10-27T20:59:44.554Z -- Registering new address: tmp.testnet. current telegram id: 821896868
+2024-10-27T20:59:44.555Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T20:59:44.581Z -- Address registered: tmp.testnet
+2024-10-27T20:59:44.582Z -- Processing update 104355250
+2024-10-27T21:00:21.837Z -- Processing update 104355251
+2024-10-27T21:00:21.838Z -- Registering new address: tmp.testnet. current telegram id: 821896868
+2024-10-27T21:00:21.840Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T21:00:21.878Z -- Address registered: tmp.testnet
+2024-10-27T21:00:21.879Z -- Processing update 104355251
+2024-10-27T21:00:45.214Z -- Processing update 104355252
+2024-10-27T21:00:45.215Z -- Registering new address: aaa.testnet. current telegram id: 821896868
+2024-10-27T21:00:45.216Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T21:00:45.240Z -- Address registered: aaa.testnet
+2024-10-27T21:00:45.240Z -- Processing update 104355252
+2024-10-27T21:03:10.206Z -- Processing update 104355253
+2024-10-27T21:03:10.207Z -- Registering new address: tmp.testnet. current telegram id: 821896868
+2024-10-27T21:03:10.209Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T21:03:10.213Z -- Error: Address already registered: tmp.testnet
+2024-10-27T21:03:10.215Z -- Processing update 104355253
+2024-10-27T21:03:20.238Z -- Processing update 104355254
+2024-10-27T21:03:20.238Z -- Registering new address: as.testnet. current telegram id: 821896868
+2024-10-27T21:03:20.239Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T21:03:20.276Z -- Address registered: as.testnet
+2024-10-27T21:03:20.276Z -- Processing update 104355254
+2024-10-27T21:04:33.271Z -- Processing update 104355255
+2024-10-27T21:04:33.272Z -- Registering new address: asdads.asd. current telegram id: 821896868
+2024-10-27T21:04:33.272Z -- Valid address: true
+2024-10-27T21:04:33.324Z -- Address registered: asdads.asd
+2024-10-27T21:04:33.326Z -- Processing update 104355255
+2024-10-27T21:04:43.205Z -- Processing update 104355256
+2024-10-27T21:04:43.206Z -- Registering new address: balda.testnet. current telegram id: 821896868
+2024-10-27T21:04:43.207Z -- Valid address: true
+2024-10-27T21:04:43.208Z -- Error: Address already registered: balda.testnet
+2024-10-27T21:04:43.208Z -- Processing update 104355256
+2024-10-27T21:05:17.176Z -- Processing update 104355257
+2024-10-27T21:05:17.177Z -- Registering new address: balda.sss. current telegram id: 821896868
+2024-10-27T21:05:17.178Z -- Valid address: true
+2024-10-27T21:05:17.216Z -- Address registered: balda.sss
+2024-10-27T21:05:17.218Z -- Processing update 104355257
+2024-10-27T21:07:05.645Z -- Processing update 104355258
+2024-10-27T21:07:05.646Z -- Registering new address: asdasd.aa. current telegram id: 821896868
+2024-10-27T21:07:05.660Z -- Error: Invalid address provided: asdasd.aa
+2024-10-27T21:07:05.662Z -- Processing update 104355258
+2024-10-27T21:07:22.977Z -- Processing update 104355259
+2024-10-27T21:07:22.977Z -- Registering new address: balda.near. current telegram id: 821896868
+2024-10-27T21:07:23.024Z -- Error: Invalid address provided: balda.near
+2024-10-27T21:07:23.024Z -- Processing update 104355259
+2024-10-27T21:07:28.645Z -- Processing update 104355260
+2024-10-27T21:07:28.645Z -- Registering new address: balda.testnet. current telegram id: 821896868
+2024-10-27T21:07:28.678Z -- Valid address: true
+2024-10-27T21:07:28.683Z -- Error: Address already registered: balda.testnet
+2024-10-27T21:07:28.684Z -- Processing update 104355260

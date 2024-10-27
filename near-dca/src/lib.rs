@@ -218,7 +218,7 @@ impl Contract {
 
         let mut batch_amount:U128 = U128(0);
         let mut batch_users:Vec<AccountId> = Vec::new();
-
+        
         for (_, user) in self.users.iter() {
             // check if user has to swap and if it is not paused
             // create a mutable copy of the user
@@ -240,7 +240,13 @@ impl Contract {
                 // add to batch
                 batch_amount = U128(batch_amount.0 + user.amount_per_swap.0);
                 batch_users.push(user.wallet.clone());
+
             }
+        }
+
+        // check if batch is empty
+        if batch_users.len() == 0 {
+            return;
         }
 
         let batch_amount_total = batch_amount.0.checked_sub(
