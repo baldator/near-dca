@@ -309,10 +309,6 @@ impl Contract {
 
         // parse the result
         let result = call_result.unwrap();
-        let result_json: serde_json::Value = serde_json::from_str(&result).unwrap();
-        // log the result
-        log!("{:#?}", result_json);
-
         // update last_swap_timestamp, total_swapped and amount for users in the batch
         for user in batch_users {
             let mut user_tmp: User = self.users.get(&user.clone()).unwrap().clone();

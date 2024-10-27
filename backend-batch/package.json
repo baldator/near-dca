@@ -4,11 +4,13 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
-      "near-api-js": "^4.0.1"
+        "dotenv": "^16.4.5",
+        "near-api-js": "^4.0.1",
+        "telegraf": "^4.16.3"
     }
-  }
+}
