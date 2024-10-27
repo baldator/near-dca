@@ -133,7 +133,6 @@ impl Contract {
         // user must exist
         assert!(self.users.contains_key(&env::signer_account_id()), "User does not exist");
         let mut user = self.users.get(&env::signer_account_id()).unwrap().clone();
-
         // check if user has enough balance
         assert!(user.total_swapped >= amount, "User does not have enough balance");
 
@@ -207,6 +206,28 @@ impl Contract {
 
         // remove user from users map
         self.users.remove(&env::signer_account_id());
+    }
+
+    pub fn can_swap(&self) -> bool {
+        for (_, user) in self.users.iter() {
+            // check if user has to swap and if it is not paused
+            // create a mutable copy of the user
+            let mut _tmp_user = user.clone();
+
+            if env::block_timestamp() >= user.last_swap_timestamp + user.swap_interval && user.pause == false {
+                // check if amount per swap is bigger than amount otherwise pause the user
+                if user.amount < user.amount_per_swap {
+                    // tmp_user.pause = true;
+                    // self.users.insert(user.wallet.clone(), tmp_user.clone());
+                    continue;
+                }
+            
+                return true;
+            }
+        }
+
+        return false;
+        
     }
 
     #[payable]
@@ -323,7 +344,7 @@ impl Contract {
             user_tmp.amount = U128(new_amount);
             self.users.insert(user_tmp.wallet.clone(), user_tmp.clone());
             // log the swap
-            log!("User {} swapped {} NEAR for {} {}", user_tmp.wallet.clone(), user_tmp.amount_per_swap.0, user_tmp.total_swapped.0, self.token_address);
+            log!("<swapLog> {{\"user\": \"{}\", \"source\": \"NEAR\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), user_tmp.amount_per_swap.0, self.token_address, user_tmp.total_swapped.0);
 
             // add to return value
             return_value.insert(user.clone(), user_tmp.total_swapped.0);
@@ -352,8 +373,7 @@ impl Contract {
         self.fees
     }
 
-    pub fn get_user(&self) -> User {
-        let user = env::signer_account_id();
+    pub fn get_user(&self, user: AccountId) -> User {
         self.users.get(&user).unwrap().clone()
     }
 }

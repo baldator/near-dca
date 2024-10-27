@@ -240,3 +240,51 @@ Processing update 1043552412024-10-27T20:48:55.495Z -- Processing update 1043552
 2024-10-27T21:07:28.678Z -- Valid address: true
 2024-10-27T21:07:28.683Z -- Error: Address already registered: balda.testnet
 2024-10-27T21:07:28.684Z -- Processing update 104355260
+2024-10-27T21:20:15.022Z -- Processing update 104355261
+2024-10-27T21:20:15.028Z -- Registered addresses: balda.testnet, balda.near, tmp.testnet, aaa.testnet, as.testnet, asdads.asd, balda.sss
+2024-10-27T21:20:15.029Z -- Processing update 104355261
+2024-10-27T21:21:50.889Z -- Processing update 104355262
+2024-10-27T21:21:50.890Z -- Deleting address: as.testnet
+2024-10-27T21:21:50.933Z -- Valid address: true
+2024-10-27T21:21:50.960Z -- Address deleted: as.testnet
+2024-10-27T21:21:50.960Z -- Processing update 104355262
+2024-10-27T21:21:53.876Z -- Processing update 104355263
+2024-10-27T21:21:53.877Z -- Registered addresses: balda.testnet, balda.near, tmp.testnet, aaa.testnet, asdads.asd, balda.sss
+2024-10-27T21:21:53.878Z -- Processing update 104355263
+2024-10-27T21:21:58.714Z -- Processing update 104355264
+2024-10-27T21:21:58.715Z -- Deleting address: balda.sss
+2024-10-27T21:21:58.752Z -- Error: Invalid address provided: balda.sss
+2024-10-27T21:21:58.752Z -- Processing update 104355264
+2024-10-27T21:25:24.774Z -- Processing update 104355265
+2024-10-27T21:25:24.812Z -- Processing update 104355265
+2024-10-27T21:36:04.901Z -- Processing update 104355266
+2024-10-27T21:39:36.114Z -- Processing update 104355267
+2024-10-27T21:39:36.119Z -- Registered addresses: balda.testnet, balda.near, tmp.testnet, aaa.testnet, asdads.asd, balda.sss
+2024-10-27T21:39:36.119Z -- Processing update 104355267
+2024-10-27T21:39:44.366Z -- Processing update 104355268
+2024-10-27T21:39:44.367Z -- Deleting address: aaa.testnet
+2024-10-27T21:39:44.388Z -- Valid address: true
+2024-10-27T21:39:44.426Z -- Address deleted: aaa.testnet
+2024-10-27T21:39:44.426Z -- Processing update 104355268
+2024-10-27T21:39:47.472Z -- Processing update 104355269
+2024-10-27T21:39:47.473Z -- Registered addresses: balda.testnet, balda.near, tmp.testnet, asdads.asd, balda.sss
+2024-10-27T21:39:47.474Z -- Processing update 104355269
+2024-10-27T22:18:00.465Z -- Processing update 104355270
+2024-10-27T22:18:00.466Z -- Processing update 104355271
+2024-10-27T22:18:00.466Z -- Processing update 104355272
+2024-10-27T22:18:00.468Z -- Processing update 104355272
+2024-10-27T22:18:00.495Z -- Processing update 104355270
+2024-10-27T22:18:00.584Z -- Processing update 104355271
+2024-10-27T22:18:10.257Z -- Processing update 104355273
+2024-10-27T22:18:10.258Z -- Error: Invalid address provided: undefined
+2024-10-27T22:18:10.258Z -- Processing update 104355273
+2024-10-27T22:18:27.375Z -- Processing update 104355274
+2024-10-27T22:18:27.376Z -- Registering new address: nickets.testnet. current telegram id: 271256747
+2024-10-27T22:18:27.454Z -- Valid address: true
+2024-10-27T22:18:27.486Z -- Address registered: nickets.testnet
+2024-10-27T22:18:27.487Z -- Processing update 104355274
+2024-10-27T22:24:59.106Z -- Processing update 104355275
+2024-10-27T22:24:59.161Z -- Processing update 104355275
+2024-10-27T22:25:04.303Z -- Processing update 104355276
+2024-10-27T22:25:04.304Z -- Registered addresses: nickets.testnet
+2024-10-27T22:25:04.304Z -- Processing update 104355276

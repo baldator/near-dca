@@ -7,6 +7,7 @@ const { Telegraf } = require('telegraf')
 const { message } = require('telegraf/filters')
 const dotenv = require('dotenv');
 const { env } = require("process");
+const { isValidNearAddress, checkAddressRegistered, getRegisteredAddresses, deleteRegisteredAddress, registerAddress, registerConversion, getTelegramUsers } = require('./utils');
 
 
 dotenv.config();
@@ -58,6 +59,21 @@ async function main() {
   // Call a view function
   try {
     
+        const responseView = await account.viewFunction({
+            contractId: CONTRACT_ID,
+            methodName: 'can_swap',
+            args: {
+            // Change method arguments go here
+            },
+        });
+        logStream.write(`Read function result: ${JSON.stringify(responseView)}\n`);
+
+        // if can't swap, exit
+        if(responseView === false) {
+            logStream.write(`Can't swap, exit\n`);
+            return;
+        }
+
         const response = await account.functionCall({
             contractId: CONTRACT_ID,
             methodName: 'swap',
@@ -67,11 +83,38 @@ async function main() {
             gas: '300000000000000', // Adjust gas accordingly
             attachedDeposit: '1', // Optional: attach NEAR tokens if needed
         });
-        logStream.write(`Write function result: ${JSON.stringify(response)}\n`);
 
-        // send telegram message
-        const bot = new Telegraf(TELEGRAM_BOT_TOKEN)
-        bot.telegram.sendMessage(821896868, `DCA Bot: test`);
+        // parse the response and for each receipts_outcome check if has outcome log
+        const receipts_outcome = response.receipts_outcome
+        for (const outcome of receipts_outcome) {
+            if (outcome.outcome.logs.length > 0) {
+                for (const log of outcome.outcome.logs) {
+                    if (log.startsWith('<swapLog>')) {
+                      let logVal = log.replace('<swapLog> ', '');
+                      logStream.write(`Swap logs: ${logVal}\n`);
+                      const json = JSON.parse(logVal);
+                      logStream.write(`Swap logs: ${outcome.outcome.logs}\n`);
+                      registerConversion(DB_FILE, outcome.id, json.user, json.source_amount, json.target_amount, json.source, json.target);
+
+                      // check if a user subscribed to telegram notification for the user address
+                      const registeredAddresses = await getTelegramUsers(DB_FILE, json.user);
+
+                      logStream.write(`Registered addresses: ${JSON.stringify(registeredAddresses)}\n`);
+
+                      // if registered, send telegram notification
+                      if(registeredAddresses.length > 0) {
+                        const bot = new Telegraf(TELEGRAM_BOT_TOKEN)
+                        registeredAddresses.forEach(registeredAddress => {
+                            logStream.write(`User ${registeredAddress.telegram_id} subscribed to telegram notification for ${json.user}... sending message\n`);
+                            bot.telegram.sendMessage(registeredAddress.telegram_id, `🔄💸 Conversion Alert! 💸🔄\n\n👤 User: ${json.user}\n💰 ${json.source_amount} ${json.source} ➡️ ${json.target_amount} ${json.target}\n🚀`);
+                        });
+                      }
+
+                    }
+                }
+
+            }
+        }
         
   } catch (error) {
     logStream.write(`Error calling view function: ${JSON.stringify(error)}\n`);
@@ -93,63 +136,6 @@ function loop() {
 
 loop();
 
-// common functions
-// check if address is a valid near address
-async function isValidNearAddress(nearConfig, accountId) {
-    try {
-      const near = await connect(nearConfig);
-      const account = await near.account(accountId);
-      const state = await account.state();
-    return Object.keys(state).length > 0;
-    } catch (error) {
-      console.error(`Error checking account: ${error}`);
-      return false;
-    }
-}
-
-// connect to sqlite database and check if the tuple accountId and telegramId exist
-async function checkAddressRegistered(accountId, telegramId){
-
-    const sqlite3 = require('sqlite3').verbose();
-    const db = new sqlite3.Database(DB_FILE);
-
-    return new Promise((resolve, reject) => {
-        db.serialize(() => {
-            db.get(`SELECT * FROM users WHERE wallet = '${accountId}' AND telegram_id = '${telegramId}'`, (err, row) => {
-                if(err) {
-                    console.error(err.message);
-                    reject(false);
-                } else {
-                    db.close();
-                    resolve(row !== undefined);
-                }
-            });
-        });
-    });
-
-}
-
-async function registerAddress(accountId, telegramId) {
-    const sqlite3 = require('sqlite3').verbose();
-    const db = new sqlite3.Database(DB_FILE);
-
-    return new Promise((resolve, reject) => {
-        db.serialize(() => {
-            db.run(`INSERT INTO users (wallet, telegram_id) VALUES ('${accountId}', '${telegramId}')`, function(err) {
-                db.close();
-                if (err) {
-                    console.error(err.message);
-                    resolve(false);
-                } else {
-                    resolve(true);
-                }
-            });
-        });
-    });
-    
-}
-
-
 // BOT CODE
 const bot = new Telegraf(TELEGRAM_BOT_TOKEN)
 const logStreamBot = fs.createWriteStream(LOG_FILE_BOT, { flags: 'a' });
@@ -164,15 +150,23 @@ bot.use(async (ctx, next) => {
 })
 
 bot.start((ctx) => ctx.reply('Welcome to NEAR DCA Bot. \n Send `/help` to get started. \n Send `/about` for more information about the project')) 
-bot.help((ctx) => ctx.reply('Help message'))
+bot.help((ctx) => ctx.reply(`
+Available commands:
+
+/register <address> - Register a new address to track
+/unregister <address> - Unregister an address
+/list - List all registered addresses
+/about - About message
+/help - Help message
+`))
 bot.command('about', (ctx) => ctx.reply('About message'))
-bot.hears('hi', (ctx) => ctx.reply('Hey there'))
+
 
 // parse message register <address>
 bot.command('register', async (ctx) => {
   const address = ctx.message.text.split(' ')[1]
   if (!address) {
-    ctx.reply('Please provide a valid address')
+    ctx.reply('Please provide a valid address. Send `/register <address>`')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -183,7 +177,7 @@ bot.command('register', async (ctx) => {
   let isValid = await isValidNearAddress(config, address)
   console.log(isValid)
   if (!isValid) {
-    ctx.reply('Please provide a valid address')
+    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address.')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -192,21 +186,72 @@ bot.command('register', async (ctx) => {
   }
 
   // check if address is already registered
-  let registered = await checkAddressRegistered(address, ctx.from.id)
+  let registered = await checkAddressRegistered(DB_FILE, address, ctx.from.id)
   if (registered) {
-    ctx.reply('Address already registered')
+    ctx.reply('Address ${address} already registered')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Address already registered: ${address}\n`)
     return
   }
 
   // register address in database
-  let register = await registerAddress(address, ctx.from.id)
+  let register = await registerAddress(DB_FILE, address, ctx.from.id)
   if (register) {
     ctx.reply('Address registered')
     logStreamBot.write(`${new Date().toISOString()} -- Address registered: ${address}\n`)
   } else {
     ctx.reply('Error registering address')
     logStreamBot.write(`${new Date().toISOString()} -- Error registering address: ${address}, current telegram id: ${ctx.from.id}\n`)
+  }
+})
+
+bot.command('list', async (ctx) => {
+  const addresses = await getRegisteredAddresses(DB_FILE, ctx.from.id)
+  if (addresses.length === 0) {
+    ctx.reply('No addresses registered')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: No addresses registered\n`)
+    return
+  }
+  ctx.reply(`Registered addresses:\n${addresses.map(address => address.wallet).join('\n')}`)
+  logStreamBot.write(`${new Date().toISOString()} -- Registered addresses: ${addresses.map(address => address.wallet).join(', ')}\n`)
+})
+
+bot.command('unregister', async (ctx) => {
+  const address = ctx.message.text.split(' ')[1]
+  if (!address) {
+    ctx.reply('Please provide a valid address. Send `/delete <address>`')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
+    return
+  }
+  ctx.reply(`Deleting address: ${address}. Please wait...`)
+  logStreamBot.write(`${new Date().toISOString()} -- Deleting address: ${address}\n`)
+
+  // check if address is a valid near address
+  let isValid = await isValidNearAddress(config, address)
+  if (!isValid) {
+    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
+    return
+  }
+  else {
+    logStreamBot.write(`${new Date().toISOString()} -- Valid address: ${isValid}\n`)
+  }
+
+  // check if address is already registered
+  let registered = await checkAddressRegistered(DB_FILE, address, ctx.from.id)
+  if (!registered) {
+    ctx.reply('Address ${address} not registered')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Address not registered: ${address}\n`)
+    return
+  }
+
+  // delete address from database
+  let deleteAddress = await deleteRegisteredAddress(DB_FILE, address, ctx.from.id)
+  if (deleteAddress) {
+    ctx.reply('Address deleted')
+    logStreamBot.write(`${new Date().toISOString()} -- Address deleted: ${address}\n`)
+  } else {
+    ctx.reply('Error deleting address')
+    logStreamBot.write(`${new Date().toISOString()} -- Error deleting address: ${address}\n`)
   }
 })
 
