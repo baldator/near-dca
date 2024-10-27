@@ -1,0 +1,58 @@
+Processing update 104355234
+Processing update 104355234Processing update 104355235
+Processing update 104355235Processing update 104355236
+Processing update 104355236Processing update 104355237
+Registering new address: balda.near. current telegram id: 821896868
+Error registering address: balda.near, current telegram id: 821896868
+Processing update 104355237Processing update 104355238
+Registering new address: balda.testnet. current telegram id: 821896868
+Error registering address: balda.testnet, current telegram id: 821896868
+Processing update 104355238Processing update 104355239
+Registering new address: balda.near. current telegram id: 821896868
+Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+Error registering address: balda.near, current telegram id: 821896868
+Processing update 104355239Processing update 104355240
+Registering new address: arroz.testnet. current telegram id: 821896868
+Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+Error registering address: arroz.testnet, current telegram id: 821896868
+Processing update 104355240Processing update 104355241
+Registering new address: balda.testnet. current telegram id: 821896868
+Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+Error registering address: balda.testnet, current telegram id: 821896868
+Processing update 1043552412024-10-27T20:48:55.495Z -- Processing update 104355242
+2024-10-27T20:48:55.496Z -- Registering new address: balda.testnet. current telegram id: 821896868
+2024-10-27T20:48:55.497Z -- Valid address: state() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.connection.provider.query({
+                request_type: 'view_account',
+                account_id: this.accountId,
+                finality: 'optimistic'
+            });
+        });
+    }
+2024-10-27T20:48:55.560Z -- Address registered: balda.testnet
+2024-10-27T20:48:55.562Z -- Processing update 104355242
