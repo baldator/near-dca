@@ -180,7 +180,7 @@ bot.command('register', async (ctx) => {
   let isValid = await isValidNearAddress(config, address)
   console.log(isValid)
   if (!isValid) {
-    ctx.reply(`${address} is not a valid NEAR address. Please provide a valid address.')
+    ctx.reply(`${address} is not a valid NEAR address. Please provide a valid address.`)
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
