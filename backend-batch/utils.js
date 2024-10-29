@@ -13,7 +13,25 @@ async function isValidNearAddress(nearConfig, accountId) {
   }
 }
 
+async function getNearAccountBalance(nearConfig, contractId, accountId) {
+  try {
+    const near = await connect(nearConfig);
+    const account = await near.account(accountId);
+    const responseView = await account.viewFunction({
+        contractId: contractId,
+        methodName: 'get_user',
+        args: {
+            user: accountId
+        },
+    });
 
+    console.log(responseView);
+    return responseView;
+  } catch (error) {
+    console.error(`Error getting account balance: ${error}`);
+    return false;
+  }
+}
 
 // connect to sqlite database and check if the tuple accountId and telegramId exist
 async function checkAddressRegistered(dbFile, accountId, telegramId){
@@ -137,6 +155,45 @@ async function registerConversion(dbFile, transaction_id, account_id, amount_sou
     
 }
 
+async function getConversions(dbFile, accountId) {
+    const sqlite3 = require('sqlite3').verbose();
+    const db = new sqlite3.Database(dbFile);
+
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM conversion WHERE account_id = '${accountId}'`, (err, rows) => {
+                if(err) {
+                    console.error(err.message);
+                    reject(false);
+                } else {
+                    db.close();
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
+async function getLatestConversion(dbFile, accountId) {
+    const sqlite3 = require('sqlite3').verbose();
+    const db = new sqlite3.Database(dbFile);
+
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM conversion WHERE account_id = '${accountId}' ORDER BY date DESC LIMIT 1`, (err, rows) => {
+                if(err) {
+                    console.error(err.message);
+                    reject(false);
+                } else {
+                    db.close();
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
+
 
 module.exports = {
     isValidNearAddress,
@@ -145,5 +202,8 @@ module.exports = {
     deleteRegisteredAddress,
     registerAddress,
     registerConversion,
-    getTelegramUsers
+    getTelegramUsers,
+    getConversions,
+    getLatestConversion,
+    getNearAccountBalance
 }

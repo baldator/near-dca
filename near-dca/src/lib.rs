@@ -27,6 +27,11 @@ pub trait ExtWrap  {
     //   }
 }
 
+#[ext_contract(ext_pool)]
+pub trait ExtPool  {
+    fn get_return(&self, pool_id: u64, token_in: AccountId, amount_in: U128, token_out: AccountId) -> U128;
+}
+
 // Define the contract structure
 #[near(contract_state, serializers = [json, borsh])]
 #[derive(PanicOnDefault)]
@@ -208,6 +213,16 @@ impl Contract {
         self.users.remove(&env::signer_account_id());
     }
 
+    #[payable]
+    pub fn change_swap_interval(&mut self, swap_interval: u64) {
+        // user must exist
+        assert!(self.users.contains_key(&env::signer_account_id()), "User does not exist");
+
+        let mut user = self.users.get(&env::signer_account_id()).unwrap().clone();
+        user.swap_interval = swap_interval;
+        self.users.insert(env::signer_account_id(), user.clone());
+    }
+
     pub fn can_swap(&self) -> bool {
         for (_, user) in self.users.iter() {
             // check if user has to swap and if it is not paused
@@ -311,7 +326,8 @@ impl Contract {
                 batch_amount_total.into(),
                 Some(action.clone())
             )
-        .then(Self::ext(env::current_account_id())
+        .then(
+            Self::ext(env::current_account_id())
                 .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
                 .callback_post_swap(
                     batch_users,
@@ -331,6 +347,10 @@ impl Contract {
             return HashMap::new();
         }
         
+        // log call result
+        log!("call result: {}", call_result.unwrap());
+        
+
         // initialize the return value
         let mut return_value: HashMap<AccountId, u128> = HashMap::new();
 

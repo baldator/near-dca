@@ -1,0 +1,64 @@
+2024-10-28T21:06:05.642Z -- Processing update 104355277
+2024-10-28T21:06:05.671Z -- Registered addresses: nickets.testnet
+2024-10-28T21:06:05.672Z -- Processing update 104355277
+2024-10-28T21:06:39.874Z -- Processing update 104355278
+2024-10-28T21:06:39.874Z -- Processing update 104355278
+2024-10-28T21:06:47.113Z -- Processing update 104355279
+2024-10-28T21:06:47.142Z -- Processing update 104355279
+2024-10-28T21:06:54.502Z -- Processing update 104355280
+2024-10-28T21:06:54.503Z -- Processing update 104355280
+2024-10-28T21:07:12.061Z -- Processing update 104355281
+2024-10-28T21:07:12.062Z -- Registered addresses: balda.testnet, balda.near, tmp.testnet, asdads.asd, balda.sss
+2024-10-28T21:07:12.063Z -- Processing update 104355281
+2024-10-28T21:07:17.623Z -- Processing update 104355282
+2024-10-28T21:07:17.623Z -- Processing update 104355282
+2024-10-28T21:08:04.209Z -- Processing update 104355283
+2024-10-28T21:08:04.209Z -- Registering new address: arroz.testnet. current telegram id: 821896868
+2024-10-28T21:08:04.262Z -- Valid address: true
+2024-10-28T21:08:04.293Z -- Address registered: arroz.testnet
+2024-10-28T21:08:04.294Z -- Processing update 104355283
+2024-10-28T21:08:09.658Z -- Processing update 104355284
+2024-10-28T21:08:09.659Z -- Registered addresses: balda.testnet, balda.near, tmp.testnet, asdads.asd, balda.sss, arroz.testnet
+2024-10-28T21:08:09.659Z -- Processing update 104355284
+2024-10-28T21:09:59.809Z -- Processing update 104355285
+2024-10-28T21:09:59.810Z -- Swapping address: balda.testnet
+2024-10-28T21:10:00.043Z -- Valid address: true
+2024-10-28T21:11:25.428Z -- Processing update 104355286
+2024-10-28T21:11:25.429Z -- Swapping address: balda.testnet
+2024-10-28T21:11:25.469Z -- Valid address: true
+2024-10-28T21:11:25.474Z -- Swaps: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+2024-10-28T21:11:25.475Z -- Processing update 104355286
+2024-10-28T21:11:35.679Z -- Processing update 104355287
+2024-10-28T21:11:35.680Z -- Checking address: balda.testnet
+2024-10-28T21:11:35.727Z -- Valid address: true
+2024-10-28T21:11:35.745Z -- Error getting status: balda.testnet
+2024-10-28T21:11:35.745Z -- Processing update 104355287
+2024-10-28T21:12:38.453Z -- Processing update 104355288
+2024-10-28T21:12:38.454Z -- Processing update 104355288
+2024-10-28T21:12:56.121Z -- Processing update 104355289
+2024-10-28T21:12:56.122Z -- Last swaps address: balda.testnet
+2024-10-28T21:12:56.153Z -- Valid address: true
+2024-10-28T21:12:56.158Z -- Last swap: [object Object]
+2024-10-28T21:12:56.160Z -- Processing update 104355289
+2024-10-28T21:15:02.544Z -- Processing update 104355290
+2024-10-28T21:15:02.545Z -- Processing update 104355290
+2024-10-28T21:15:16.157Z -- Processing update 104355291
+2024-10-28T21:15:16.158Z -- Swapping address: balda.testnet
+2024-10-28T21:15:16.187Z -- Valid address: true
+2024-10-28T21:15:16.192Z -- Swaps: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+2024-10-28T21:15:16.194Z -- Processing update 104355291
+2024-10-28T21:15:26.289Z -- Processing update 104355292
+2024-10-28T21:15:26.289Z -- Last swaps address: balda.testnet
+2024-10-28T21:15:26.340Z -- Valid address: true
+2024-10-28T21:15:26.342Z -- Last swap: [object Object]
+2024-10-28T21:15:26.343Z -- Processing update 104355292
+2024-10-28T21:15:34.269Z -- Processing update 104355293
+2024-10-28T21:15:34.270Z -- Checking address: balda.testnet
+2024-10-28T21:15:34.309Z -- Valid address: true
+2024-10-28T21:15:34.324Z -- Status: [object Object]
+2024-10-28T21:15:34.324Z -- Processing update 104355293
+2024-10-28T21:21:23.746Z -- Processing update 104355294
+2024-10-28T21:21:23.747Z -- Checking address: balda.testnet
+2024-10-28T21:21:23.794Z -- Valid address: true
+2024-10-28T21:21:23.810Z -- Status: [object Object]
+2024-10-28T21:21:23.811Z -- Processing update 104355294

@@ -7,7 +7,7 @@ const { Telegraf } = require('telegraf')
 const { message } = require('telegraf/filters')
 const dotenv = require('dotenv');
 const { env } = require("process");
-const { isValidNearAddress, checkAddressRegistered, getRegisteredAddresses, deleteRegisteredAddress, registerAddress, registerConversion, getTelegramUsers } = require('./utils');
+const { isValidNearAddress, checkAddressRegistered, getRegisteredAddresses, deleteRegisteredAddress, registerAddress, registerConversion, getTelegramUsers, getConversions, getLatestConversion, getNearAccountBalance } = require('./utils');
 
 
 dotenv.config();
@@ -156,6 +156,9 @@ Available commands:
 /register <address> - Register a new address to track
 /unregister <address> - Unregister an address
 /list - List all registered addresses
+/swaps <address> - Get a list of swaps for an address
+/last_swap <address> - Get the last swap for an address
+/check <address> - Get the onchain status for an address
 /about - About message
 /help - Help message
 `))
@@ -252,6 +255,120 @@ bot.command('unregister', async (ctx) => {
   } else {
     ctx.reply('Error deleting address')
     logStreamBot.write(`${new Date().toISOString()} -- Error deleting address: ${address}\n`)
+  }
+})
+
+bot.command('swaps', async (ctx) => {
+  const address = ctx.message.text.split(' ')[1]
+  if (!address) {
+    ctx.reply('Please provide a valid address. Send `/swap <address>`')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
+    return
+  }
+  ctx.reply(`Getting the list of swaps for address: ${address}. Please wait...`)
+  logStreamBot.write(`${new Date().toISOString()} -- Swapping address: ${address}\n`)
+
+  // check if address is a valid near address
+  let isValid = await isValidNearAddress(config, address)
+  if (!isValid) {
+    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
+    return
+  }
+  else {
+    logStreamBot.write(`${new Date().toISOString()} -- Valid address: ${isValid}\n`)
+  }
+
+  // check if address is already registered
+  let registered = await checkAddressRegistered(DB_FILE, address, ctx.from.id)
+  if (!registered) {
+    ctx.reply('Address ${address} not registered')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Address not registered: ${address}\n`)
+    return
+  }
+
+  // get list of swaps
+  let swaps = await getConversions(DB_FILE, address)
+  if (swaps) {
+    const formattedSwaps = swaps.map(swap => {
+      return `User: ${swap.user}, Source: ${swap.source}, Source Amount: ${swap.source_amount}, Target: ${swap.target}, Target Amount: ${swap.target_amount}`;
+    }).join('\n');
+    ctx.reply(formattedSwaps);
+    logStreamBot.write(`${new Date().toISOString()} -- Swaps: ${swaps}\n`)
+  } else {
+    ctx.reply('Error getting swaps')
+    logStreamBot.write(`${new Date().toISOString()} -- Error getting swaps: ${address}\n`)
+  }
+})
+
+bot.command('last_swap', async (ctx) => {
+  const address = ctx.message.text.split(' ')[1]
+  if (!address) {
+    ctx.reply('Please provide a valid address. Send `/last_swaps <address>`')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
+    return
+  }
+  ctx.reply(`Getting the last swap for address: ${address}. Please wait...`)
+  logStreamBot.write(`${new Date().toISOString()} -- Last swaps address: ${address}\n`)
+
+  // check if address is a valid near address
+  let isValid = await isValidNearAddress(config, address)
+  if (!isValid) {
+    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
+    return
+  }
+  else {
+    logStreamBot.write(`${new Date().toISOString()} -- Valid address: ${isValid}\n`)
+  }
+
+  // check if address is already registered
+  let registered = await checkAddressRegistered(DB_FILE, address, ctx.from.id)
+  if (!registered) {
+    ctx.reply('Address ${address} not registered')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Address not registered: ${address}\n`)
+    return
+  }
+
+  // get last swap
+  let lastSwap = await getLatestConversion(DB_FILE, address)
+  if (lastSwap) {
+    ctx.reply(`Last Swap Details:\nAccount ID: ${lastSwap.account_id}\nSource Amount: ${lastSwap.amount_source}\nDestination Amount: ${lastSwap.amount_dest}\nSource Token: ${lastSwap.token_source}\nDestination Token: ${lastSwap.token_dest}\nTransaction ID: ${lastSwap.transaction_id}\nDate: ${lastSwap.date}`)
+    logStreamBot.write(`${new Date().toISOString()} -- Last swap: ${lastSwap}\n`)
+  } else {
+    ctx.reply('Error getting last swap')
+    logStreamBot.write(`${new Date().toISOString()} -- Error getting last swap: ${address}\n`)
+  }
+})
+
+bot.command('check', async (ctx) => {
+  const address = ctx.message.text.split(' ')[1]
+  if (!address) {
+    ctx.reply('Please provide a valid address. Send `/check <address>`')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
+    return
+  }
+  ctx.reply(`Checking address: ${address}. Please wait...`)
+  logStreamBot.write(`${new Date().toISOString()} -- Checking address: ${address}\n`)
+
+  // check if address is a valid near address
+  let isValid = await isValidNearAddress(config, address)
+  if (!isValid) {
+    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address')
+    logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
+    return
+  }
+  else {
+    logStreamBot.write(`${new Date().toISOString()} -- Valid address: ${isValid}\n`)
+  }
+
+  let status = await getNearAccountBalance(config, CONTRACT_ID, address)
+  if (status) {
+    ctx.reply(`Account status:\nAmount per swap: ${status.amount_per_swap}\nSwap interval: ${status.swap_interval}\nLast swap timestamp: ${status.last_swap_timestamp}\nTarget amount: ${status.total_swapped}\nPaused: ${status.pause}`)
+    logStreamBot.write(`${new Date().toISOString()} -- Status: ${status}\n`)
+  } else {
+    ctx.reply('Error getting status')
+    logStreamBot.write(`${new Date().toISOString()} -- Error getting status: ${address}\n`)
   }
 })
 

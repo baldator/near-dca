@@ -197,3 +197,62 @@ Registered addresses: [{"id":1,"wallet":"balda.testnet","telegram_id":"821896868
 User 821896868 subscribed to telegram notification for balda.testnet... sending message
 Next execution in 5 minutes... at 2024-10-27T22:32:15.048Z
 ----------------------------------------------------
+Read function result: true
+Swap logs: {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1492500000000000000000000"}
+Swap logs: <swapLog> {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1492500000000000000000000"}
+Registered addresses: [{"id":1,"wallet":"balda.testnet","telegram_id":"821896868"}]
+User 821896868 subscribed to telegram notification for balda.testnet... sending message
+Next execution in 5 minutes... at 2024-10-27T22:37:23.912Z
+----------------------------------------------------
+Read function result: true
+Swap logs: {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1592000000000000000000000"}
+Swap logs: <swapLog> {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1592000000000000000000000"}
+Registered addresses: [{"id":1,"wallet":"balda.testnet","telegram_id":"821896868"}]
+User 821896868 subscribed to telegram notification for balda.testnet... sending message
+Next execution in 5 minutes... at 2024-10-27T22:42:32.588Z
+----------------------------------------------------
+Read function result: true
+Swap logs: {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1691500000000000000000000"}
+Swap logs: <swapLog> {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1691500000000000000000000"}
+Registered addresses: [{"id":1,"wallet":"balda.testnet","telegram_id":"821896868"}]
+User 821896868 subscribed to telegram notification for balda.testnet... sending message
+Next execution in 5 minutes... at 2024-10-27T22:47:41.734Z
+----------------------------------------------------
+Read function result: true
+Swap logs: {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1791000000000000000000000"}
+Swap logs: <swapLog> {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1791000000000000000000000"}
+Registered addresses: [{"id":1,"wallet":"balda.testnet","telegram_id":"821896868"}]
+User 821896868 subscribed to telegram notification for balda.testnet... sending message
+Next execution in 5 minutes... at 2024-10-27T22:52:49.860Z
+----------------------------------------------------
+Read function result: true
+Swap logs: {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1890500000000000000000000"}
+Swap logs: <swapLog> {"user": "balda.testnet", "source": "NEAR", "source_amount": 100000000000000000000000, "target": "usdt.fakes.testnet", "target_amount": "1890500000000000000000000"}
+Registered addresses: [{"id":1,"wallet":"balda.testnet","telegram_id":"821896868"}]
+User 821896868 subscribed to telegram notification for balda.testnet... sending message
+Next execution in 5 minutes... at 2024-10-27T22:57:58.551Z
+----------------------------------------------------
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-27T23:02:58.613Z
+----------------------------------------------------
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-27T23:07:58.659Z
+----------------------------------------------------
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-27T23:12:58.700Z
+----------------------------------------------------
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-27T23:17:58.746Z
+----------------------------------------------------
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-27T23:22:58.796Z
+----------------------------------------------------
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-27T23:27:58.833Z
+----------------------------------------------------

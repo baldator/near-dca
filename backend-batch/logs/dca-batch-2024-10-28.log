@@ -1,0 +1,43 @@
+----------------------------------------------------
+Start execution: 2024-10-28T21:06:05.537Z
+Read function result: true
+Swap logs: {"user": "nickets.testnet", "source": "NEAR", "source_amount": 400000000000000033554432, "target": "usdt.fakes.testnet", "target_amount": "398000000000000033386660"}
+Swap logs: <swapLog> {"user": "nickets.testnet", "source": "NEAR", "source_amount": 400000000000000033554432, "target": "usdt.fakes.testnet", "target_amount": "398000000000000033386660"}
+Registered addresses: [{"id":16,"wallet":"nickets.testnet","telegram_id":"271256747"}]
+User 271256747 subscribed to telegram notification for nickets.testnet... sending message
+Next execution in 5 minutes... at 2024-10-28T21:11:15.541Z
+----------------------------------------------------
+----------------------------------------------------
+Start execution: 2024-10-28T21:09:21.044Z
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-28T21:14:21.149Z
+----------------------------------------------------
+----------------------------------------------------
+Start execution: 2024-10-28T21:11:11.815Z
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-28T21:16:11.930Z
+----------------------------------------------------
+----------------------------------------------------
+Start execution: 2024-10-28T21:12:45.768Z
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-28T21:17:45.898Z
+----------------------------------------------------
+----------------------------------------------------
+Start execution: 2024-10-28T21:14:52.239Z
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-28T21:19:52.359Z
+----------------------------------------------------
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-28T21:24:52.429Z
+----------------------------------------------------
+----------------------------------------------------
+Start execution: 2024-10-28T21:20:48.757Z
+Read function result: false
+Can't swap, exit
+Next execution in 5 minutes... at 2024-10-28T21:25:48.882Z
+----------------------------------------------------
