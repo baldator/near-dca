@@ -180,7 +180,7 @@ bot.command('register', async (ctx) => {
   let isValid = await isValidNearAddress(config, address)
   console.log(isValid)
   if (!isValid) {
-    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address.')
+    ctx.reply(`${address} is not a valid NEAR address. Please provide a valid address.')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -231,7 +231,7 @@ bot.command('unregister', async (ctx) => {
   // check if address is a valid near address
   let isValid = await isValidNearAddress(config, address)
   if (!isValid) {
-    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address')
+    ctx.reply(`${address} is not a valid NEAR address. Please provide a valid address`)
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -271,7 +271,7 @@ bot.command('swaps', async (ctx) => {
   // check if address is a valid near address
   let isValid = await isValidNearAddress(config, address)
   if (!isValid) {
-    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address')
+    ctx.reply(`${address} is not a valid NEAR address. Please provide a valid address`)
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -314,7 +314,7 @@ bot.command('last_swap', async (ctx) => {
   // check if address is a valid near address
   let isValid = await isValidNearAddress(config, address)
   if (!isValid) {
-    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address')
+    ctx.reply(`${address} is not a valid NEAR address. Please provide a valid address`)
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -354,7 +354,7 @@ bot.command('check', async (ctx) => {
   // check if address is a valid near address
   let isValid = await isValidNearAddress(config, address)
   if (!isValid) {
-    ctx.reply('${address} is not a valid NEAR address. Please provide a valid address')
+    ctx.reply(`${address} is not a valid NEAR address. Please provide a valid address`)
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -371,6 +371,11 @@ bot.command('check', async (ctx) => {
     logStreamBot.write(`${new Date().toISOString()} -- Error getting status: ${address}\n`)
   }
 })
+
+bot.on('message', (ctx) => {
+  logStreamBot.write(`${new Date().toISOString()} -- Message: ${ctx.message.text}\n`)
+  ctx.reply(`Unknown command: ${ctx.message.text}. Send /help for help.`)
+  })
 
 bot.launch()
 
