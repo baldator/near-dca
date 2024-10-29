@@ -153,14 +153,14 @@ bot.start((ctx) => ctx.reply('Welcome to NEAR DCA Bot. \n Send `/help` to get st
 bot.help((ctx) => ctx.reply(`
 Available commands:
 
-/register <address> - Register a new address to track
-/unregister <address> - Unregister an address
-/list - List all registered addresses
-/swaps <address> - Get a list of swaps for an address
-/last_swap <address> - Get the last swap for an address
-/check <address> - Get the onchain status for an address
-/about - About message
-/help - Help message
+/register <address> - Register a new address to track 💰
+/unregister <address> - Unregister an address ❌
+/list - List all registered addresses 📝
+/swaps <address> - Get a list of swaps for an address 📊
+/last_swap <address> - Get the last swap for an address ⏱️
+/check <address> - Get the onchain status for an address 📊
+/about - About message 🤔
+/help - Help message 🤔
 `))
 bot.command('about', (ctx) => ctx.reply('About message'))
 
@@ -169,18 +169,18 @@ bot.command('about', (ctx) => ctx.reply('About message'))
 bot.command('register', async (ctx) => {
   const address = ctx.message.text.split(' ')[1]
   if (!address) {
-    ctx.reply('Please provide a valid address. Send `/register <address>`')
+    ctx.reply('❌ Please provide a valid address. Send `/register <address>`')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
-  ctx.reply(`Registering new address: ${address}. Please wait...`)
+  ctx.reply(`Registering new address: ${address} 📝. Please wait...`)
   logStreamBot.write(`${new Date().toISOString()} -- Registering new address: ${address}. current telegram id: ${ctx.from.id}\n`)
 
   // check if address is a valid near address
   let isValid = await isValidNearAddress(config, address)
   console.log(isValid)
   if (!isValid) {
-    ctx.reply(`${address} is not a valid NEAR address. Please provide a valid address.`)
+    ctx.reply(`❌ ${address} is not a valid NEAR address. Please provide a valid address.`)
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -191,7 +191,7 @@ bot.command('register', async (ctx) => {
   // check if address is already registered
   let registered = await checkAddressRegistered(DB_FILE, address, ctx.from.id)
   if (registered) {
-    ctx.reply('Address ${address} already registered')
+    ctx.reply('❌ Address ${address} already registered')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Address already registered: ${address}\n`)
     return
   }
@@ -199,10 +199,10 @@ bot.command('register', async (ctx) => {
   // register address in database
   let register = await registerAddress(DB_FILE, address, ctx.from.id)
   if (register) {
-    ctx.reply('Address registered')
+    ctx.reply('✅ Address registered 👍')
     logStreamBot.write(`${new Date().toISOString()} -- Address registered: ${address}\n`)
   } else {
-    ctx.reply('Error registering address')
+    ctx.reply('❌ Error registering address')
     logStreamBot.write(`${new Date().toISOString()} -- Error registering address: ${address}, current telegram id: ${ctx.from.id}\n`)
   }
 })
@@ -214,14 +214,14 @@ bot.command('list', async (ctx) => {
     logStreamBot.write(`${new Date().toISOString()} -- Error: No addresses registered\n`)
     return
   }
-  ctx.reply(`Registered addresses:\n${addresses.map(address => address.wallet).join('\n')}`)
+  ctx.reply(`✅ Registered addresses:\n${addresses.map(address => address.wallet).join('\n')}`)
   logStreamBot.write(`${new Date().toISOString()} -- Registered addresses: ${addresses.map(address => address.wallet).join(', ')}\n`)
 })
 
 bot.command('unregister', async (ctx) => {
   const address = ctx.message.text.split(' ')[1]
   if (!address) {
-    ctx.reply('Please provide a valid address. Send `/delete <address>`')
+    ctx.reply('❌ Please provide a valid address. Send `/delete <address>`')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -231,7 +231,7 @@ bot.command('unregister', async (ctx) => {
   // check if address is a valid near address
   let isValid = await isValidNearAddress(config, address)
   if (!isValid) {
-    ctx.reply(`${address} is not a valid NEAR address. Please provide a valid address`)
+    ctx.reply(`❌ ${address} is not a valid NEAR address. Please provide a valid address`)
     logStreamBot.write(`${new Date().toISOString()} -- Error: Invalid address provided: ${address}\n`)
     return
   }
@@ -242,7 +242,7 @@ bot.command('unregister', async (ctx) => {
   // check if address is already registered
   let registered = await checkAddressRegistered(DB_FILE, address, ctx.from.id)
   if (!registered) {
-    ctx.reply('Address ${address} not registered')
+    ctx.reply('❌ Address ${address} not registered')
     logStreamBot.write(`${new Date().toISOString()} -- Error: Address not registered: ${address}\n`)
     return
   }
@@ -250,10 +250,10 @@ bot.command('unregister', async (ctx) => {
   // delete address from database
   let deleteAddress = await deleteRegisteredAddress(DB_FILE, address, ctx.from.id)
   if (deleteAddress) {
-    ctx.reply('Address deleted')
+    ctx.reply('✅ Address deleted')
     logStreamBot.write(`${new Date().toISOString()} -- Address deleted: ${address}\n`)
   } else {
-    ctx.reply('Error deleting address')
+    ctx.reply('❌ Error deleting address')
     logStreamBot.write(`${new Date().toISOString()} -- Error deleting address: ${address}\n`)
   }
 })
