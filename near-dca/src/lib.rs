@@ -84,7 +84,7 @@ impl Contract {
         // get attached deposit
         let amount = env::attached_deposit();
         assert!(amount.as_yoctonear() > 0, "Deposit must be greater than 0");
-        assert!(amount.as_yoctonear() > amount_per_swap.0, "Deposit must be greater than 0");
+        assert!(amount.as_yoctonear() > amount_per_swap.0, "Deposit must be greater than swap amount");
 
         // user must not exist
         assert!(!self.users.contains_key(&env::signer_account_id()), "User already exists");
