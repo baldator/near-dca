@@ -290,6 +290,13 @@ bot.command('swaps', async (ctx) => {
   // get list of swaps
   let swaps = await getConversions(DB_FILE, address)
   if (swaps) {
+    // if there are no swaps
+    if (swaps.length === 0) {
+      ctx.reply('No swaps found')
+      logStreamBot.write(`${new Date().toISOString()} -- No swaps found: ${address}\n`)
+      return
+    }
+
     const formattedSwaps = swaps.map(swap => {
       return `User: ${swap.user}, Source: ${swap.source}, Source Amount: ${swap.source_amount}, Target: ${swap.target}, Target Amount: ${swap.target_amount}`;
     }).join('\n');
@@ -333,6 +340,14 @@ bot.command('last_swap', async (ctx) => {
   // get last swap
   let lastSwap = await getLatestConversion(DB_FILE, address)
   if (lastSwap) {
+    // if there are no swaps
+    if (lastSwap.length === 0) {
+      ctx.reply('No swaps found')
+      logStreamBot.write(`${new Date().toISOString()} -- No swaps found: ${address}\n`)
+      return
+    }
+
+    // format last swap
     ctx.reply(`Last Swap Details:\nAccount ID: ${lastSwap.account_id}\nSource Amount: ${lastSwap.amount_source}\nDestination Amount: ${lastSwap.amount_dest}\nSource Token: ${lastSwap.token_source}\nDestination Token: ${lastSwap.token_dest}\nTransaction ID: ${lastSwap.transaction_id}\nDate: ${lastSwap.date}`)
     logStreamBot.write(`${new Date().toISOString()} -- Last swap: ${lastSwap}\n`)
   } else {
