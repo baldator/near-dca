@@ -57,6 +57,7 @@ trait Ref {
 pub trait ExtWrap  {
     fn near_deposit(&mut self);
     fn ft_transfer_call(&mut self, receiver_id: AccountId, amount: U128, msg: Option<String>);
+    fn near_withdraw(&mut self, amount: U128);
    // Arguments: {
     //     "receiver_id": "v2.ref-finance.near",
     //     "amount": "1000000000000000000000000",

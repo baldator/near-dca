@@ -1,13 +1,12 @@
 // Find all our documentation at https://docs.near.org
 use near_sdk::json_types::U128;
 use near_sdk::{
- AccountId, near, PanicOnDefault, env, Promise, NearToken, log, Gas, PromiseResult, PromiseError
+ AccountId, near, PanicOnDefault, env, Promise, NearToken, log, Gas, PromiseError, near_bindgen
 };
 use std::collections::HashMap;
 use ext::{create_ref_message, ext_fungible_token, ext_wrap, ref_contract};
 
 pub const GAS_FOR_FT_TRANSFER: Gas = Gas::from_gas(20_000_000_000_000);
-pub const GAS_FOR_FT_TRANSFER_CALL: Gas = Gas::from_gas(100_000_000_000_000);
 pub const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas::from_gas(20_000_000_000_000);
 pub const YOCTO_DEPOSIT: NearToken = NearToken::from_yoctonear(1);
 
@@ -84,6 +83,12 @@ impl Contract {
         };
         self.users.insert(env::signer_account_id(), user);
         self.user_addresses.push(env::signer_account_id());
+
+        // wrap the amount
+        ext_wrap::ext(self.wrap_account.clone())
+            .with_static_gas(GAS_FOR_FT_TRANSFER)
+            .with_attached_deposit(NearToken::from_yoctonear(amount.as_yoctonear().into()))
+            .near_deposit();
     }
 
     #[payable]
@@ -98,26 +103,18 @@ impl Contract {
 
         user.amount = U128(user.amount.0 + amount.as_yoctonear()); // add amount;
         self.users.insert(env::signer_account_id(), user.clone());
-    }
 
-    #[payable]
-    pub fn topup_ft(&mut self, #[callback_result] call_result: Result<U128, PromiseError>) {
-        // make sure it's a callback of ft_transfer_call from token contract
-        assert!(env::predecessor_account_id() == self.token_address, "Must be called from token contract");
-
-        let amount = call_result.unwrap();
-        
-        // user must exist
-        assert!(self.users.contains_key(&env::signer_account_id()), "User does not exist");
-
-        let mut user = self.users.get(&env::signer_account_id()).unwrap().clone();
-
-        user.amount = U128(user.total_swapped.0 + amount.0); // add amount;
-        self.users.insert(env::signer_account_id(), user.clone());
+        // wrap the amount
+        ext_wrap::ext(self.wrap_account.clone())
+            .with_static_gas(GAS_FOR_FT_TRANSFER)
+            .with_attached_deposit(NearToken::from_yoctonear(amount.as_yoctonear().into()))
+            .near_deposit();
     }
 
     #[payable]
     pub fn withdraw_near(&mut self, amount: U128) {
+        let deposit = env::attached_deposit();
+        assert!(deposit.as_yoctonear() == 1, "Deposit must be 1");
         // user must exist
         assert!(self.users.contains_key(&env::signer_account_id()), "User does not exist");
         let mut user = self.users.get(&env::signer_account_id()).unwrap().clone();
@@ -130,7 +127,13 @@ impl Contract {
         self.users.insert(env::signer_account_id(), user.clone());
 
         let near_amount: NearToken = NearToken::from_yoctonear(amount.0);
-        Promise::new(env::signer_account_id()).transfer(near_amount);
+
+        // wrap the amount
+        ext_wrap::ext(self.wrap_account.clone())
+            .with_static_gas(GAS_FOR_FT_TRANSFER)
+            .with_attached_deposit(YOCTO_DEPOSIT)
+            .near_withdraw(amount).
+        then(Promise::new(env::signer_account_id()).transfer(near_amount));
     }
 
     #[payable]
@@ -202,6 +205,8 @@ impl Contract {
 
     #[payable]
     pub fn remove_user(&mut self) {
+        let deposit = env::attached_deposit();
+        assert!(deposit.as_yoctonear() == 1, "Deposit must be 1");
         // user must exist
         assert!(self.users.contains_key(&env::signer_account_id()), "User does not exist");
 
@@ -223,13 +228,20 @@ impl Contract {
         self.users.insert(env::signer_account_id(), user.clone());
     }
 
-    pub fn can_swap(&self) -> bool {
+    pub fn can_swap(&self, reverse: Option<bool>) -> bool {
+        
+        // check if reverse is not set then set it to false
+        let reverse_flag = match reverse {
+            Some(reverse) => reverse,
+            None => false
+        };
+
         for (_, user) in self.users.iter() {
             // check if user has to swap and if it is not paused
             // create a mutable copy of the user
             let mut _tmp_user = user.clone();
 
-            if env::block_timestamp() >= user.last_swap_timestamp + user.swap_interval && user.pause == false {
+            if env::block_timestamp() >= user.last_swap_timestamp + user.swap_interval && user.pause == false && user.reverse == reverse_flag {
                 // check if amount per swap is bigger than amount otherwise pause the user
                 if user.amount < user.amount_per_swap {
                     // tmp_user.pause = true;
@@ -296,40 +308,9 @@ impl Contract {
         ).unwrap_or(0);
 
 
-        // if the swap is not reverse
-        if reverse_flag == false {
-            ext_wrap::ext(self.wrap_account.clone())
-                .with_static_gas(GAS_FOR_FT_TRANSFER)
-                .with_attached_deposit(NearToken::from_yoctonear(batch_amount_total))
-                .near_deposit(
-                )
-            .then(Self::ext(env::current_account_id())
-                    .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
-                    .callback_post_wrap(
-                        batch_users,
-                        batch_amount,
-                        batch_amount_total,
-                        reverse_flag
-            ));
-        }
-        else {
-            self.callback_post_wrap(batch_users, batch_amount, batch_amount_total, reverse_flag);
-        }
-
-
-    }
-
-    #[private]
-    pub fn callback_post_wrap(&mut self, batch_users:Vec<AccountId>, batch_amount:U128, batch_amount_total:u128, reverse: bool) {
-        
-        if env::promise_results_count() == 1 {
-            assert_eq!(env::promise_result(0), PromiseResult::Successful(vec![]), "Failed to wrap tokens");
-            
-        }
-
         let target_ft_account;
         // format the actions
-        if reverse == false {
+        if reverse_flag == false {
             target_ft_account = self.wrap_account.clone();
         }
         else {
@@ -337,7 +318,7 @@ impl Contract {
         }
 
         ext_wrap::ext(target_ft_account.clone())
-            .with_static_gas(GAS_FOR_FT_TRANSFER_CALL)
+            .with_static_gas(Gas::from_tgas(30))
             .with_attached_deposit(NearToken::from_yoctonear(1))
             .ft_transfer_call(
                 self.pool_address.clone(),
@@ -346,12 +327,12 @@ impl Contract {
             )
         .then(
             Self::ext(env::current_account_id())
-                .with_static_gas(GAS_FOR_RESOLVE_TRANSFER)
+                .with_static_gas(Gas::from_tgas(150))
                 .pool_transfer_callback(
                     batch_users,
                     batch_amount,
                     batch_amount_total,
-                    reverse
+                    reverse_flag
         ));
     }
 
@@ -426,13 +407,18 @@ impl Contract {
             let mut user_tmp: User = self.users.get(&user.clone()).unwrap().clone();
             user_tmp.last_swap_timestamp = env::block_timestamp();
             // get the percentage of total_swapped and amount
-            user_tmp.total_swapped = U128(user_tmp.total_swapped.0 + (user_tmp.amount_per_swap.0 / batch_amount.0) * batch_amount_total);
+            let target_amount = (user_tmp.amount_per_swap.0 / batch_amount.0) * amount.0;
+            user_tmp.total_swapped = U128(user_tmp.total_swapped.0 +target_amount);
             let new_amount = user_tmp.amount.0.checked_sub(user_tmp.amount_per_swap.0).expect("Insufficient funds");
             user_tmp.amount = U128(new_amount);
             self.users.insert(user_tmp.wallet.clone(), user_tmp.clone());
             // log the swap
-            log!("<swapLog> {{\"user\": \"{}\", \"source\": \"NEAR\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), user_tmp.amount_per_swap.0, self.token_address, user_tmp.total_swapped.0);
-
+            if reverse == false {
+                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.wrap_account, user_tmp.amount_per_swap.0, self.token_address, user_tmp.total_swapped.0);
+            }
+            else {
+                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.token_address, user_tmp.amount_per_swap.0, self.wrap_account, user_tmp.total_swapped.0);
+            }
             // add to return value
             return_value.insert(user.clone(), user_tmp.total_swapped.0);
         }
@@ -462,6 +448,67 @@ impl Contract {
 
     pub fn get_user(&self, user: AccountId) -> User {
         self.users.get(&user).unwrap().clone()
+    }
+}
+
+    /*
+    trait that will be used as the callback from the FT contract. When ft_transfer_call is
+    called, it will fire a cross contract call to this marketplace and this is the function
+    that is invoked. 
+*/
+trait FungibleTokenReceiver {
+    fn ft_on_transfer(
+        &mut self,
+        sender_id: AccountId,
+        amount: U128
+    ) -> U128;
+}
+
+//implementation of the trait
+#[near_bindgen]
+impl FungibleTokenReceiver for Contract {
+    /// This is how users will fund their FT balances in the contract
+    fn ft_on_transfer(
+        &mut self,
+        sender_id: AccountId,
+        amount: U128
+    ) -> U128 {
+        // get the contract ID which is the predecessor
+        let ft_contract_id = env::predecessor_account_id();
+        // Ensure only the specified FT can be used
+        // check if the predecessor is the FT contract
+        assert_eq!(
+            ft_contract_id, self.token_address, "The FT token accepted is {}", self.token_address
+        );
+        
+        //get the signer which is the person who initiated the transaction
+        let signer_id = env::signer_account_id();
+
+        //make sure that the signer isn't the predecessor. This is so that we're sure
+        //this was called via a cross-contract call
+        assert_ne!(
+            ft_contract_id,
+            signer_id,
+            "ft_on_transfer should only be called via cross-contract call"
+        );
+        //make sure the owner ID is the signer. 
+        assert_eq!(
+            sender_id,
+            signer_id,
+            "sender_id should be signer_id"
+        );
+    
+        
+        // user must exist
+        assert!(self.users.contains_key(&env::signer_account_id()), "User does not exist");
+
+        let mut user = self.users.get(&env::signer_account_id()).unwrap().clone();
+
+        user.amount = U128(user.total_swapped.0 + amount.0); // add amount;
+        self.users.insert(env::signer_account_id(), user.clone());
+
+        // We don't return any FTs to the sender because we're storing all of them in their balance
+        U128(0)
     }
 }
 
