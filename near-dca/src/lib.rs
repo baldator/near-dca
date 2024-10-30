@@ -414,16 +414,17 @@ impl Contract {
             user_tmp.last_swap_timestamp = env::block_timestamp();
             // get the percentage of total_swapped and amount
             let target_amount = (user_tmp.amount_per_swap.0 / batch_amount.0) * amount.0;
+            let final_amount = target_amount.checked_sub(target_amount.checked_mul(self.fees as u128).unwrap_or(0) / 10000).unwrap_or(0);
             user_tmp.total_swapped = U128(user_tmp.total_swapped.0 +target_amount);
             let new_amount = user_tmp.amount.0.checked_sub(user_tmp.amount_per_swap.0).expect("Insufficient funds");
             user_tmp.amount = U128(new_amount);
             self.users.insert(user_tmp.wallet.clone(), user_tmp.clone());
             // log the swap
             if reverse == false {
-                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.wrap_account, user_tmp.amount_per_swap.0, self.token_address, target_amount);
+                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.wrap_account, user_tmp.amount_per_swap.0, self.token_address, final_amount);
             }
             else {
-                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.token_address, user_tmp.amount_per_swap.0, self.wrap_account, target_amount);
+                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.token_address, user_tmp.amount_per_swap.0, self.wrap_account, final_amount);
             }
             // add to return value
             return_value.insert(user.clone(), user_tmp.total_swapped.0);
