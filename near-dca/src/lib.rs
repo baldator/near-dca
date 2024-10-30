@@ -413,7 +413,7 @@ impl Contract {
             let mut user_tmp: User = self.users.get(&user.clone()).unwrap().clone();
             user_tmp.last_swap_timestamp = env::block_timestamp();
             // get the percentage of total_swapped and amount
-            let target_amount = (user_tmp.amount_per_swap.0 / batch_amount.0) * amount.0;
+            let target_amount = (((user_tmp.amount_per_swap.0*100) / batch_amount.0) * amount.0)/100;
             let final_amount = target_amount.checked_sub(target_amount.checked_mul(self.fees as u128).unwrap_or(0) / 10000).unwrap_or(0);
             user_tmp.total_swapped = U128(user_tmp.total_swapped.0 +target_amount);
             let new_amount = user_tmp.amount.0.checked_sub(user_tmp.amount_per_swap.0).expect("Insufficient funds");
