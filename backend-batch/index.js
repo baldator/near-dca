@@ -124,10 +124,10 @@ async function main() {
             reverse: true,
           },
       });
-      logStream.write(`Read function result: ${JSON.stringify(responseView)}\n`);
+      logStream.write(`Read reverse function result: ${JSON.stringify(responseViewReverse)}\n`);
 
       // if can't swap, exit
-      if(responseView === false) {
+      if(responseViewReverse === false) {
           logStream.write(`Can't swap reverse, exit\n`);
       }
       else{

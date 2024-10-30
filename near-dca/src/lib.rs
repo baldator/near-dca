@@ -420,10 +420,10 @@ impl Contract {
             self.users.insert(user_tmp.wallet.clone(), user_tmp.clone());
             // log the swap
             if reverse == false {
-                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.wrap_account, user_tmp.amount_per_swap.0, self.token_address, user_tmp.total_swapped.0);
+                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.wrap_account, user_tmp.amount_per_swap.0, self.token_address, target_amount);
             }
             else {
-                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.token_address, user_tmp.amount_per_swap.0, self.wrap_account, user_tmp.total_swapped.0);
+                log!("<swapLog> {{\"user\": \"{}\", \"source\": \"{}\", \"source_amount\": {}, \"target\": \"{}\", \"target_amount\": \"{}\"}}", user_tmp.wallet.clone(), self.token_address, user_tmp.amount_per_swap.0, self.wrap_account, target_amount);
             }
             // add to return value
             return_value.insert(user.clone(), user_tmp.total_swapped.0);
