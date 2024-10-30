@@ -8,11 +8,12 @@ const { message } = require('telegraf/filters')
 const dotenv = require('dotenv');
 const { env } = require("process");
 const { isValidNearAddress, checkAddressRegistered, getRegisteredAddresses, deleteRegisteredAddress, registerAddress, registerConversion, getTelegramUsers, getConversions, getLatestConversion, getNearAccountBalance } = require('./utils');
+const { reverse } = require("dns");
 
 
 dotenv.config();
 const NEAR_NET = 'testnet';
-const CONTRACT_ID = 'test.dca-near.testnet';
+const CONTRACT_ID = 'test2.dca-near.testnet';
 const ACCOUNT_ID = 'dca-near.testnet';
 const LOG_FILE_BATCH = `./logs/dca-batch-${new Date().toISOString().split('T')[0]}.log`;
 const LOG_FILE_BOT = `./logs/dca-bot-${new Date().toISOString().split('T')[0]}.log`;
@@ -70,15 +71,71 @@ async function main() {
 
         // if can't swap, exit
         if(responseView === false) {
-            logStream.write(`Can't swap, exit\n`);
-            return;
+            logStream.write(`Can't swap regular, exit\n`);
+        }
+        else{
+          const response = await account.functionCall({
+              contractId: CONTRACT_ID,
+              methodName: 'swap',
+              args: {
+              // Change method arguments go here
+              },
+              gas: '300000000000000', // Adjust gas accordingly
+              attachedDeposit: '1', // Optional: attach NEAR tokens if needed
+          });
+
+          // parse the response and for each receipts_outcome check if has outcome log
+          const receipts_outcome = response.receipts_outcome
+          for (const outcome of receipts_outcome) {
+              if (outcome.outcome.logs.length > 0) {
+                  for (const log of outcome.outcome.logs) {
+                      if (log.startsWith('<swapLog>')) {
+                        let logVal = log.replace('<swapLog> ', '');
+                        logStream.write(`Swap logs: ${logVal}\n`);
+                        const json = JSON.parse(logVal);
+                        logStream.write(`Swap logs: ${outcome.outcome.logs}\n`);
+                        registerConversion(DB_FILE, outcome.id, json.user, json.source_amount, json.target_amount, json.source, json.target);
+
+                        // check if a user subscribed to telegram notification for the user address
+                        const registeredAddresses = await getTelegramUsers(DB_FILE, json.user);
+
+                        logStream.write(`Registered addresses: ${JSON.stringify(registeredAddresses)}\n`);
+
+                        // if registered, send telegram notification
+                        if(registeredAddresses.length > 0) {
+                          const bot = new Telegraf(TELEGRAM_BOT_TOKEN)
+                          registeredAddresses.forEach(registeredAddress => {
+                              logStream.write(`User ${registeredAddress.telegram_id} subscribed to telegram notification for ${json.user}... sending message\n`);
+                              bot.telegram.sendMessage(registeredAddress.telegram_id, `🔄💸 Conversion Alert! 💸🔄\n\n👤 User: ${json.user}\n💰 ${json.source_amount} ${json.source} ➡️ ${json.target_amount} ${json.target}\n🚀`);
+                          });
+                        }
+
+                      }
+                  }
+
+              }
+          }
         }
 
+      const responseViewReverse = await account.viewFunction({
+          contractId: CONTRACT_ID,
+          methodName: 'can_swap',
+          args: {
+            reverse: true,
+          },
+      });
+      logStream.write(`Read function result: ${JSON.stringify(responseView)}\n`);
+
+      // if can't swap, exit
+      if(responseView === false) {
+          logStream.write(`Can't swap reverse, exit\n`);
+      }
+      else{
         const response = await account.functionCall({
             contractId: CONTRACT_ID,
             methodName: 'swap',
             args: {
-            // Change method arguments go here
+              reverse: true,
             },
             gas: '300000000000000', // Adjust gas accordingly
             attachedDeposit: '1', // Optional: attach NEAR tokens if needed
@@ -115,6 +172,7 @@ async function main() {
 
             }
         }
+      }
         
   } catch (error) {
     logStream.write(`Error calling view function: ${JSON.stringify(error)}\n`);

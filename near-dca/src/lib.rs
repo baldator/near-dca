@@ -62,7 +62,7 @@ impl Contract {
     }
 
     #[payable]
-    pub fn register_user(&mut self, amount_per_swap: U128, swap_interval: u64, reverse: bool) {
+    pub fn register_user(&mut self, amount_per_swap: U128, swap_interval: u64, reverse: Option<bool>) {
         // get attached deposit
         let amount = env::attached_deposit();
         assert!(amount.as_yoctonear() > 0, "Deposit must be greater than 0");
@@ -70,6 +70,12 @@ impl Contract {
 
         // user must not exist
         assert!(!self.users.contains_key(&env::signer_account_id()), "User already exists");
+
+        // check if reverse is not set then set it to false
+        let reverse_flag = match reverse {
+            Some(reverse) => reverse,
+            None => false
+        };
         
         let user = User {
             wallet: env::signer_account_id(),
@@ -79,7 +85,7 @@ impl Contract {
             total_swapped: U128(0),
             amount: amount.as_yoctonear().into(),
             pause: false,
-            reverse,
+            reverse: reverse_flag,
         };
         self.users.insert(env::signer_account_id(), user);
         self.user_addresses.push(env::signer_account_id());
