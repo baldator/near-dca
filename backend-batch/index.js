@@ -19,6 +19,10 @@ const LOG_FILE_BATCH = `./logs/dca-batch-${new Date().toISOString().split('T')[0
 const LOG_FILE_BOT = `./logs/dca-bot-${new Date().toISOString().split('T')[0]}.log`;
 const DB_FILE = env.DATABASE_FILE || './data/dca-batch.db';
 const TELEGRAM_BOT_TOKEN = env.TELEGRAM_BOT_TOKEN || 'TELEGRAM_BOT_TOKEN';
+const DECIMALS = {
+  'wrap.testnet': 24,
+  'usdt.fakes.testnet': 6,
+}
 
 // Set up the key store
 const keyStore = new keyStores.UnencryptedFileSystemKeyStore(path.join(__dirname, '/near-credentials'));
@@ -356,7 +360,11 @@ bot.command('swaps', async (ctx) => {
     }
     
     const formattedSwaps = swaps.map(swap => {
-      return `User: ${swap.account_id}, Source: ${swap.token_source}, Source Amount: ${swap.amount_source}, Target: ${swap.token_dest}, Target Amount: ${swap.amount_dest}`;
+      // convert source amount and divide by decimals
+      let amount_source = swap.amount_source / (10 ** DECIMALS[swap.token_source])
+      // convert target amount and divide by decimals
+      let amount_dest = swap.amount_dest / (10 ** DECIMALS[swap.token_dest])
+      return `👥 User: ${swap.account_id}\n💰 Source: ${swap.token_source}\n💸 Source Amount: ${amount_source}\n📈 Target: ${swap.token_dest}\n💸 Target Amount: ${amount_dest}\n`;
     }).join('\n');
     ctx.reply(formattedSwaps);
   } else {
@@ -407,7 +415,11 @@ bot.command('last_swap', async (ctx) => {
     // format last swap
     ctx.reply(`Last Swap Details:\n`);
     const formattedSwaps = lastSwap.map(swap => {
-      return `User: ${swap.account_id}, Source: ${swap.token_source}, Source Amount: ${swap.amount_source}, Target: ${swap.token_dest}, Target Amount: ${swap.amount_dest}`;
+      // convert source amount and divide by decimals
+      let amount_source = swap.amount_source / (10 ** DECIMALS[swap.token_source])
+      // convert target amount and divide by decimals
+      let amount_dest = swap.amount_dest / (10 ** DECIMALS[swap.token_dest])
+      return `👥 User: ${swap.account_id}\n💰 Source: ${swap.token_source}\n💸 Source Amount: ${amount_source}\n📈 Target: ${swap.token_dest}\n💸 Target Amount: ${amount_dest}\n`;
     }).join('\n');
     ctx.reply(formattedSwaps);
     logStreamBot.write(`${new Date().toISOString()} -- Last swap: ${lastSwap}\n`)
