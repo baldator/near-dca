@@ -354,12 +354,12 @@ bot.command('swaps', async (ctx) => {
       logStreamBot.write(`${new Date().toISOString()} -- No swaps found: ${address}\n`)
       return
     }
-
+    
     const formattedSwaps = swaps.map(swap => {
-      return `User: ${swap.user}, Source: ${swap.source}, Source Amount: ${swap.source_amount}, Target: ${swap.target}, Target Amount: ${swap.target_amount}`;
+      return `User: ${swap.account_id}, Source: ${swap.source}, Source Amount: ${swap.token_source}, Target: ${swap.token_dest}, Target Amount: ${swap.amount_dest}`;
     }).join('\n');
     ctx.reply(formattedSwaps);
-    logStreamBot.write(`${new Date().toISOString()} -- Swaps: ${swaps}\n`)
+    logStreamBot.write(`${new Date().toISOString()} -- Swaps: ${JSON.stringify(swaps)}\n`)
   } else {
     ctx.reply('Error getting swaps')
     logStreamBot.write(`${new Date().toISOString()} -- Error getting swaps: ${address}\n`)
