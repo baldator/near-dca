@@ -359,7 +359,6 @@ bot.command('swaps', async (ctx) => {
       return `User: ${swap.account_id}, Source: ${swap.token_source}, Source Amount: ${swap.amount_source}, Target: ${swap.token_dest}, Target Amount: ${swap.amount_dest}`;
     }).join('\n');
     ctx.reply(formattedSwaps);
-    logStreamBot.write(`${new Date().toISOString()} -- Swaps: ${JSON.stringify(swaps)}\n`)
   } else {
     ctx.reply('Error getting swaps')
     logStreamBot.write(`${new Date().toISOString()} -- Error getting swaps: ${address}\n`)
@@ -410,6 +409,7 @@ bot.command('last_swap', async (ctx) => {
     const formattedSwaps = lastSwap.map(swap => {
       return `User: ${swap.account_id}, Source: ${swap.token_source}, Source Amount: ${swap.amount_source}, Target: ${swap.token_dest}, Target Amount: ${swap.amount_dest}`;
     }).join('\n');
+    ctx.reply(formattedSwaps);
     logStreamBot.write(`${new Date().toISOString()} -- Last swap: ${lastSwap}\n`)
   } else {
     ctx.reply('❌ Error getting last swap')
