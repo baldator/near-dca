@@ -356,7 +356,7 @@ bot.command('swaps', async (ctx) => {
     }
     
     const formattedSwaps = swaps.map(swap => {
-      return `User: ${swap.account_id}, Source: ${swap.source}, Source Amount: ${swap.token_source}, Target: ${swap.token_dest}, Target Amount: ${swap.amount_dest}`;
+      return `User: ${swap.account_id}, Source: ${swap.token_source}, Source Amount: ${swap.amount_source}, Target: ${swap.token_dest}, Target Amount: ${swap.amount_dest}`;
     }).join('\n');
     ctx.reply(formattedSwaps);
     logStreamBot.write(`${new Date().toISOString()} -- Swaps: ${JSON.stringify(swaps)}\n`)
@@ -406,7 +406,10 @@ bot.command('last_swap', async (ctx) => {
     }
 
     // format last swap
-    ctx.reply(`Last Swap Details:\nAccount ID: ${lastSwap.account_id}\nSource Amount: ${lastSwap.amount_source}\nDestination Amount: ${lastSwap.amount_dest}\nSource Token: ${lastSwap.token_source}\nDestination Token: ${lastSwap.token_dest}\nTransaction ID: ${lastSwap.transaction_id}\nDate: ${lastSwap.date}`)
+    ctx.reply(`Last Swap Details:\n`);
+    const formattedSwaps = lastSwap.map(swap => {
+      return `User: ${swap.account_id}, Source: ${swap.token_source}, Source Amount: ${swap.amount_source}, Target: ${swap.token_dest}, Target Amount: ${swap.amount_dest}`;
+    }).join('\n');
     logStreamBot.write(`${new Date().toISOString()} -- Last swap: ${lastSwap}\n`)
   } else {
     ctx.reply('❌ Error getting last swap')
@@ -436,7 +439,7 @@ bot.command('check', async (ctx) => {
   }
 
   let status = await getNearAccountBalance(config, CONTRACT_ID, address)
-  if (status) {
+  if (status) {  
     ctx.reply(`Account status:\nAmount per swap: ${status.amount_per_swap}\nSwap interval: ${status.swap_interval}\nLast swap timestamp: ${status.last_swap_timestamp}\nTarget amount: ${status.total_swapped}\nPaused: ${status.pause}`)
     logStreamBot.write(`${new Date().toISOString()} -- Status: ${status}\n`)
   } else {

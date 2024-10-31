@@ -161,7 +161,7 @@ async function getConversions(dbFile, accountId) {
 
     return new Promise((resolve, reject) => {
         db.serialize(() => {
-            db.all(`SELECT * FROM conversion WHERE account_id = '${accountId}'`, (err, rows) => {
+            db.all(`SELECT TOP 10 * FROM conversion WHERE account_id = '${accountId}' ORDER BY date DESC`, (err, rows) => {
                 if(err) {
                     console.error(err.message);
                     reject(false);
