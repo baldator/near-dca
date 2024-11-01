@@ -453,6 +453,14 @@ impl Contract {
         self.fees
     }
 
+    pub fn get_wrap_account(&self) -> AccountId {
+        self.wrap_account
+    }
+
+    pub fn get_token_address(&self) -> AccountId {
+        self.token_address
+    }
+
     pub fn get_user(&self, user: AccountId) -> User {
         self.users.get(&user).unwrap().clone()
     }
