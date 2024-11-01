@@ -454,11 +454,11 @@ impl Contract {
     }
 
     pub fn get_wrap_account(&self) -> AccountId {
-        self.wrap_account
+        self.wrap_account.clone()
     }
 
     pub fn get_token_address(&self) -> AccountId {
-        self.token_address
+        self.token_address.clone()
     }
 
     pub fn get_user(&self, user: AccountId) -> User {
